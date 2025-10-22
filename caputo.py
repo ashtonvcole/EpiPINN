@@ -21,8 +21,8 @@ def caputo_euler(f, alpha, t_span, num_step, y0):
         ys = np.tile(y0, (num_step + 1, 1))
         
         # Solution loop
-        for j in range(1, num_step + 1):
-            for k in range(j, num_step + 1):
+        for j in range(0, num_step + 1):
+            for k in range(j + 1, num_step + 1):
                 ys[k, :] += h ** alpha / gamma(alpha + 1) * ((k + 1 - j) ** alpha - (k - j) ** alpha) * f(ts[j], ys[j, :])
     else:
         ys = y0 * np.ones(num_step + 1)
