@@ -1,23 +1,23 @@
-from math import gamma
 import numpy as np
 from scipy.linalg import toeplitz
+from scipy.special import gamma
 
 def caputo_l1_diff(fs, alpha, dt=1.0, ts=None):
-    """Compute approximate Caputo fractional derivatice using the L1 scheme.
+    """Compute approximate Caputo fractional derivative using the L1 scheme.
 
     Args:
         fs (np.ndarray): A series of function values. For vector-valued functions, dimension 0 is assumed to correspond to time.
-        alpha: The order of the derivative, in the range (0.0, 1.0].
+        alpha (float): The order of the derivative, in the range (0.0, 1.0].
         dt=1.0 (float): If the corresponding dependent variable series is not provided, the uniform step size between function evaluations.
         ts=None (np.ndarray): The corresponding dependent variable series, used if there is a variable step size.
 
     Returns:
-        An np.ndarray containing the 
+        An np.ndarray containing the series of fractional derivatives.
     """
     fps = np.zeros(fs.shape)
     C = dt ** -alpha / gamma(2 - alpha)
     dfs = fs[1:] - fs[:-1]
-    if ts == None:
+    if ts is None:
         rs = np.arange(fps.shape[0] - 1)
         ws = (rs + 1) ** (1 - alpha) - rs ** (1 - alpha) # Convolution weights
         row = np.zeros(fps.shape[0] - 1)
@@ -25,25 +25,25 @@ def caputo_l1_diff(fs, alpha, dt=1.0, ts=None):
         A = toeplitz(ws, row)
         fps[1:] = C * A @ dfs
     else:
-        raise('Variable time step differentiation not yet implemented!')
+        raise NotImplementedError('Variable time step differentiation not yet implemented!')
     return fps
 
 def caputo_l1_diff_loop(fs, alpha, dt=1.0, ts=None):
-    """Compute approximate Caputo fractional derivatice using the L1 scheme.
+    """Compute approximate Caputo fractional derivative using the L1 scheme.
 
     Args:
         fs (np.ndarray): A series of function values. For vector-valued functions, dimension 0 is assumed to correspond to time.
-        alpha: The order of the derivative, in the range (0.0, 1.0].
+        alpha (float): The order of the derivative, in the range (0.0, 1.0].
         dt=1.0 (float): If the corresponding dependent variable series is not provided, the uniform step size between function evaluations.
         ts=None (np.ndarray): The corresponding dependent variable series, used if there is a variable step size.
 
     Returns:
-        An np.ndarray containing the 
+        An np.ndarray containing the series of fractional derivatives.
     """
     fps = np.zeros(fs.size)
     C = dt ** -alpha / gamma(2 - alpha)
     dfs = fs[1:] - fs[:-1]
-    if ts == None:
+    if ts is None:
         rs = np.arange(fps.size - 1)
         ws = (rs + 1) ** (1 - alpha) - rs ** (1 - alpha) # Convolution weights
         for k in range(fps.size - 1):
