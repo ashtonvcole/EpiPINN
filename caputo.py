@@ -53,7 +53,7 @@ def caputo_l1_diff_loop(fs, alpha, dt=1.0, ts=None):
     return fps
 
 
-def caputo_euler(f, alpha, t_span, num_step, y0, noise_level=0.0):
+def caputo_euler(f, alpha, t_span, num_step, y0):
     """Integrate a system of Caputo fractional-order ODEs using the forward Euler method
     and optionally add Gaussian noise to the output.
 
@@ -63,8 +63,6 @@ def caputo_euler(f, alpha, t_span, num_step, y0, noise_level=0.0):
         t_span (tuple): A pair of floats representing the initial and final times.
         num_step (int): The number of time steps used for integration.
         y0 (float or numpy.ndarray): A scalar or vector initial condition consistent with the FDE output.
-        noise_level (float, optional): Standard deviation of the Gaussian noise to add,
-                                      relative to the standard deviation of the computed solution.
     Returns:
         A tuple of numpy.ndarrays (ts, ys) consisting of the times and corresponding solution vectors. ts has dimension k + 1. ys has dimension k + 1 for scalar FDEs or (k + 1, n) for n-dimensional vector FDEs.
     """
@@ -93,16 +91,6 @@ def caputo_euler(f, alpha, t_span, num_step, y0, noise_level=0.0):
         for k in range(num_step):
             fs[k] = f(ts[k], ys[k])
             ys[k + 1] = y0 + C * np.sum(fs[:(k + 1)] * np.flip(ws[:(k + 1)]))
-
-    if noise_level > 0.0:
-
-        std_dev_ys = np.std(ys, axis=0 if ys.ndim > 1 else None)
-        # Avoid division by zero or tiny std dev for constant signals
-        noise_scale = noise_level * np.where(std_dev_ys < 1e-10, 1.0, std_dev_ys)
-
-        noise = np.random.normal(loc=0.0, scale=noise_scale, size=ys.shape)
-
-        ys[1:] = ys[1:] + noise[1:]
 
     return ts, ys
 
