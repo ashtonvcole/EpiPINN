@@ -54,8 +54,7 @@ def caputo_l1_diff_loop(fs, alpha, dt=1.0, ts=None):
 
 
 def caputo_euler(f, alpha, t_span, num_step, y0):
-    """Integrate a system of Caputo fractional-order ODEs using the forward Euler method
-    and optionally add Gaussian noise to the output.
+    """Integrate a system of Caputo fractional-order ODEs using the forward Euler method.
 
     Args:
         f (function): A scalar- or vector-valued fractional-order ODE, using the convention D_alpha[y] = f(t, y).
