@@ -52,16 +52,17 @@ def caputo_l1_diff_loop(fs, alpha, dt=1.0, ts=None):
         raise('Variable time step differentiation not yet implemented!')
     return fps
 
+
 def caputo_euler(f, alpha, t_span, num_step, y0):
-    """Integrate a system of Caputo fractional-order ODEs using the forward Euler method.
-    
+    """Integrate a system of Caputo fractional-order ODEs using the forward Euler method
+    and optionally add Gaussian noise to the output.
+
     Args:
         f (function): A scalar- or vector-valued fractional-order ODE, using the convention D_alpha[y] = f(t, y).
         alpha (float): The order of the derivative, in the range (0.0, 1.0].
-        t_span (tuple): A pair of floats representing the inital and final times.
+        t_span (tuple): A pair of floats representing the initial and final times.
         num_step (int): The number of time steps used for integration.
         y0 (float or numpy.ndarray): A scalar or vector initial condition consistent with the FDE output.
-    
     Returns:
         A tuple of numpy.ndarrays (ts, ys) consisting of the times and corresponding solution vectors. ts has dimension k + 1. ys has dimension k + 1 for scalar FDEs or (k + 1, n) for n-dimensional vector FDEs.
     """
@@ -91,6 +92,7 @@ def caputo_euler(f, alpha, t_span, num_step, y0):
         for k in range(num_step):
             fs[k] = f(ts[k], ys[k])
             ys[k + 1] = y0 + C * np.sum(fs[:(k + 1)] * np.flip(ws[:(k + 1)]))
+
     return ts, ys
 
 def naive_caputo_euler(f, alpha, t_span, num_step, y0):
