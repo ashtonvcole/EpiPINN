@@ -80,7 +80,6 @@ def caputo_euler(f, alpha, t_span, num_step, y0):
         for k in range(num_step):
             fs[k, :] = f(ts[k], ys[k, :])
             ys[k + 1, :] = y0 + C * np.sum(fs[:(k + 1), :] * np.flip(ws[:(k + 1)]).reshape(-1, 1), axis=0)
-            print(f'D[s] = {fs[k, 0]}, s = {ys[k + 1, 0]}')
     else:
         # Initial conditions
         ys = np.zeros(num_step + 1)
