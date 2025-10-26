@@ -418,7 +418,7 @@ def train_stage2(model, ts, ys, t_colloc, ic, optimizer, epochs=1000, patience=5
 
         # Print progress if desired
         if pr != 0 and (epoch + 1) % pr == 0:
-            print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.6f}')
+            print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.6f}, Patience: {patience_counter}')
 
 
     # Set to evaluation mode
