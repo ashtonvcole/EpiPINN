@@ -311,7 +311,6 @@ def train_stage1(model, ts, ys, t_colloc, ic, optimizer, epochs=1000, patience=5
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
         
         # Early stopping
         if loss.item() < best_loss:
@@ -378,47 +377,49 @@ def train_stage2(model, ts, ys, t_colloc, ic, optimizer, epochs=1000, patience=5
     patience_counter = 0
 
     for epoch in range(epochs):
-        predictions = model(ts)
+        def closure():
+            predictions = model(ts)
+            
+            # Compute losses separately, then combine
+            loss_data = model.get_loss_data(ts, ys, y_data_pred=predictions)
+            loss_ic = model.get_loss_ic(t_colloc, ic, y_pred=predictions)
+            loss_phys = model.get_loss_phys(t_colloc)
         
-        # Compute losses separately, then combine
-        loss_data = model.get_loss_data(ts, ys, y_data_pred=predictions)
-        loss_ic = model.get_loss_ic(t_colloc, ic, y_pred=predictions)
-        loss_phys = model.get_loss_phys(t_colloc)
+            loss = loss_data + weight_ic_phys * (loss_ic + loss_phys)
     
-        loss = loss_data + weight_ic_phys * (loss_ic + loss_phys)
-
-        # Record losses
-        losses.append(loss.item())
-        losses_data.append(loss_data.item())
-        losses_ic.append(loss_ic.item())
-        losses_phys.append(loss_phys.item())
-
-        # Record epidemiological parameters
-        alphas.append(model.alpha().item())
-        betas.append(model.beta().item())
-        sigmas.append(model.sigma().item())
-        gammas.append(model.gamma().item())
-        mus.append(model.mu().item())
-
-        # Adjust weights to minimize loss
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
+            # Record losses
+            losses.append(loss.item())
+            losses_data.append(loss_data.item())
+            losses_ic.append(loss_ic.item())
+            losses_phys.append(loss_phys.item())
+    
+            # Record epidemiological parameters
+            alphas.append(model.alpha().item())
+            betas.append(model.beta().item())
+            sigmas.append(model.sigma().item())
+            gammas.append(model.gamma().item())
+            mus.append(model.mu().item())
+    
+            # Adjust weights to minimize loss
+            optimizer.zero_grad()
+            loss.backward()
+            return loss
+        
+        optimizer.step(closure)
         
         # Early stopping
-        if loss.item() < best_loss:
-            best_loss = loss.item()
+        if losses[-1] < best_loss:
+            best_loss = losses[-1]
             patience_counter = 0
         else:
             patience_counter += 1
             
-        if patience_counter > 500 or loss.item() < 1e-6:
+        if patience_counter > 500 or losses[-1] < 1e-6:
             break
 
         # Print progress if desired
         if pr != 0 and (epoch + 1) % pr == 0:
-            print(f'Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.6f}, Patience: {patience_counter}')
+            print(f'Epoch [{epoch + 1}/{epochs}], Loss: {losses[-1]:.6f}, Patience: {patience_counter}')
 
 
     # Set to evaluation mode
